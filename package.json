@@ -17,14 +17,17 @@
     "webpack": "^2.2.1"
   },
   "dependencies": {
-    "angular": "^1.6.3",
     "body-parser": "^1.17.2",
+    "css-loader": "^0.28.5",
     "express": "^4.15.0",
     "jquery": "^3.1.1",
-    "mongoose": "^4.8.6",
-    "mysql": "^2.13.0",
+    "kue": "^0.11.6",
     "nodemon": "^1.11.0",
     "react": "^15.4.2",
-    "react-dom": "^15.4.2"
+    "react-dom": "^15.4.2",
+    "redis": "^2.8.0",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
+    "style-loader": "^0.18.2"
   }
 }

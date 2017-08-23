@@ -4,19 +4,38 @@ class Form extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      url: ''
+      url: '',
+      jobId: ''
     }
     this.handleUrlChange = this.handleUrlChange.bind(this);
-    this.handleSubmitForm = this.handleSubmitForm.bind(this);
+    this.handleJobIdChange = this.handleJobIdChange.bind(this);
+    this.handleFetch = this.handleFetch.bind(this);
+    this.handleGetHTML = this.handleGetHTML.bind(this);
   }
 
   handleUrlChange(e) {
     this.setState({url: e.target.value});
   }
 
-  handleSubmitForm(e) {
+  handleJobIdChange(e) {
+    this.setState({jobId: e.target.value});
+  }
+
+  handleGetHTML(e) {
     e.preventDefault();
-    console.log(this.state.url);
+    const jobId = this.state.jobId;
+    fetch(`/urls/${jobId}`)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log(responseJson);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  handleFetch(e) {
+    e.preventDefault();
     fetch('/urls', {
       method: 'POST',
       headers: {
@@ -26,19 +45,27 @@ class Form extends Component {
       body: JSON.stringify({
         url: this.state.url
       })
+    })
+    .then(response => response.json())
+    .then(responseJson => {
+      console.log(responseJson);
     });
   }
 
   render() {
-    return (<div className="container-fluid">
-      <form onSubmit={this.handleSubmitForm} className="myForm">
-        <div className="form-inline row">
-        <div className="form-group">
-          <input onChange={this.handleUrlChange} className="form-control formInput" type="text" placeholder="Enter a URL" required/>
+    return (<div>
+      <form>
+        <div>
+          <input onChange={this.handleUrlChange} type="text" placeholder="Enter a URL" required/>
         </div>
-        <div className="form-group">
-          <input className="btn btn-info formInput submitBtn btn-block" type="submit" value="ADD"/>
+        <div>
+          <button onClick={this.handleFetch} type="button">Fetch</button>
         </div>
+        <div>
+          <input onChange={this.handleJobIdChange} type="text" placeholder="Enter a job ID" required/>
+        </div>
+        <div>
+          <button onClick={this.handleGetHTML} type="button">GET HTML</button>
         </div>
       </form>
     </div>);
