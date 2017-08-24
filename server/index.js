@@ -1,3 +1,4 @@
+var util = require('./utility');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
@@ -9,18 +10,16 @@ var queue = kue.createQueue();
 queue.watchStuckJobs(6000);
 queue.process('urls', function(job, done){
   let url = job.data.url;
-  console.log('hello', url);
-  rp('http://www.google.com')
+  rp(url)
   .then((htmlString) => {
-      // Process html..
-      console.log(htmlString);
       redisClient.set(job.id, htmlString, (err, res) => {
-        console.log(job.id + 'done');
+        console.log(`job ${job.id} done`);
         done();
       });
   })
   .catch(function (err) {
       // Crawling failed...
+      console.error(`${job.id} failed`);
   });
 });
 
@@ -29,25 +28,36 @@ app.use(bodyParser.json());
 
 app.post('/urls', (req, res) => {
   let url = req.body.url;
-  let job = queue.create('urls', {
-      title:  `fetch html from ${url}`,
-      url
-  }).save( function(err){
-    if( !err ) {
-      res.status(200).json({jobId: job.id});
-    }
-  });
+  if (!util.isValidUrl(url)) {
+    res.status(404).json({error: 'url entered is not valid'});
+  } else {
+    let job = queue.create('urls', {
+        title:  `fetch html from ${url}`,
+        url
+    }).save( function(err){
+      if( !err ) {
+        res.status(200).json({jobId: job.id});
+      }
+    });
+  }
 });
 
 app.get('/urls/:id', (req, res) => {
   const jobId = req.params.id;
-  console.log(jobId);
   kue.Job.get(jobId, (err, job) => {
-    console.log(job._state);
-  });
-  redisClient.get(jobId, function(err, result) {
     if (!err) {
-      res.send(JSON.stringify(result));
+      console.log(job._state);
+      if (job._state === 'complete') {
+        redisClient.get(jobId, function(err, result) {
+          if (!err) {
+            res.send(JSON.stringify(result));
+          }
+        });
+      } else {
+        res.send(JSON.stringify('job is not completed yet'));
+      }  
+    } else {
+      res.send(JSON.stringify('job does not exist'));
     }
   });
 });

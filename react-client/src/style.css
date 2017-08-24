@@ -33,3 +33,21 @@ button[type="button"] {
   display: inline-block;
   font-size: 16px;
 }
+
+.jobIdField {
+  width: 100%;
+  background-color: #ddd;
+  border: none;
+  color:black;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+.htmlContent {
+  font-size: 16px;
+  margin-top: 25px;
+}

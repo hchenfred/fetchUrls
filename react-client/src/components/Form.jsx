@@ -5,7 +5,10 @@ class Form extends Component {
     super(props);
     this.state = {
       url: '',
-      jobId: ''
+      jobId: '',
+      receivedJobId: '',
+      urlErrorMessage: '',
+      htmlContent: ''
     }
     this.handleUrlChange = this.handleUrlChange.bind(this);
     this.handleJobIdChange = this.handleJobIdChange.bind(this);
@@ -25,17 +28,18 @@ class Form extends Component {
     e.preventDefault();
     const jobId = this.state.jobId;
     fetch(`/urls/${jobId}`)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({htmlContent: responseJson});
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   }
 
   handleFetch(e) {
     e.preventDefault();
+    this.setState({receivedJobId: '', urlErrorMessage: ''});
     fetch('/urls', {
       method: 'POST',
       headers: {
@@ -48,11 +52,20 @@ class Form extends Component {
     })
     .then(response => response.json())
     .then(responseJson => {
-      console.log(responseJson);
+      if (responseJson.jobId) {
+        this.setState({receivedJobId: responseJson.jobId});
+      }
+      if (responseJson.error) {
+        this.setState({urlErrorMessage: responseJson.error});
+      }
+    }).catch(err => {
+      console.log(err);
     });
   }
 
   render() {
+    let jobIdField = this.state.receivedJobId === '' ? null : (<div className="jobIdField">Job Id is {this.state.receivedJobId}</div>);
+    let urlErrorMessageField = this.state.urlErrorMessage === '' ? null : (<div className="jobIdField">{this.state.urlErrorMessage}</div>);
     return (<div>
       <form>
         <div>
@@ -61,11 +74,16 @@ class Form extends Component {
         <div>
           <button onClick={this.handleFetch} type="button">Fetch</button>
         </div>
+        {jobIdField}
+        {urlErrorMessageField}
         <div>
           <input onChange={this.handleJobIdChange} type="text" placeholder="Enter a job ID" required/>
         </div>
         <div>
           <button onClick={this.handleGetHTML} type="button">GET HTML</button>
+        </div>
+        <div className="htmlContent">
+        {this.state.htmlContent}
         </div>
       </form>
     </div>);
